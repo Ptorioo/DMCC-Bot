@@ -121,6 +121,16 @@ class Music(commands.Cog):
             self.musicQueue[id] = []
             self.queueIndex[id] = 0
             logging.info(f"Music cog initialized! ID: {id}")
+    
+    @commands.Cog.listener()
+    async def on_guild_join(self, guild):
+        id = int(guild.id)
+        self.vc[id] = None
+        self.is_paused[id] = False
+        self.is_playing[id] = False
+        self.musicQueue[id] = []
+        self.queueIndex[id] = 0
+        logging.info(f"Music cog initialized! ID: {id}")
 
     @commands.command()
     async def join(self, ctx):
