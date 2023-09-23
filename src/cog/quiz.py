@@ -46,15 +46,27 @@ async def send_response(ctx, response, isEmbed):
 def get_response(arg):
     match arg:
         case 'quiz-div':
-            embed = discord.Embed(title='Division Quizzes', description='- France', color=0x00ff00)
+            embed = discord.Embed(
+                title='Division Quizzes',
+                description='- France',
+                color=0x00ff00
+            )
             embed.set_footer(text='Feel free to give me feedback!')
             return embed
         case 'quiz-flag':
-            embed = discord.Embed(title='Divisional Flag Quizzes', description='- France', color=0x00ff00)
+            embed = discord.Embed(
+                title='Divisional Flag Quizzes',
+                description='- France',
+                color=0x00ff00
+            )
             embed.set_footer(text='Feel free to give me feedback!')
             return embed
         case 'quiz-code':
-            embed = discord.Embed(title='Area Code Quizzes', description='- France', color=0x00ff00)
+            embed = discord.Embed(
+                title='Area Code Quizzes',
+                description='- France',
+                color=0x00ff00
+            )
             embed.set_footer(text='Feel free to give me feedback!')
             return embed
         case _:

@@ -2,13 +2,16 @@ import os
 import json
 import asyncio
 import discord
+import yt_dlp
+import logging
+from youtubesearchpython import VideosSearch
 from discord.ext import commands, tasks
 
 CURRENT_DIR = os.path.dirname(__file__)
 
 BASE_DIR = os.path.dirname(CURRENT_DIR)
 
-COGS_DIR = os.path.join(CURRENT_DIR, 'cog')
+COG_DIR = os.path.join(CURRENT_DIR, 'cog')
 
 CONFIG_FILE_PATH = os.path.join(CURRENT_DIR, '..', 'CONFIG.json')
 

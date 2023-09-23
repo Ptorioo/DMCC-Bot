@@ -23,8 +23,9 @@ if %errorlevel% neq 0 (
 )
 
 pip install discord
+pip install yt-dlp
+pip install youtube-search-python
 pip install ffmpeg
-pip install PyNaCl
 
 touch CONFIG.json
 (
