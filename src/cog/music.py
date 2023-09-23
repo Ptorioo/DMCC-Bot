@@ -88,7 +88,8 @@ class Music(commands.Cog):
             self.is_playing[id] = True
             self.is_paused[id] = False
 
-            await self.joinVC(ctx, self.musicQueue[id][self.queueIndex[id]][1])
+            if self.vc[id] == None:
+                await self.joinVC(ctx, self.musicQueue[id][self.queueIndex[id]][1])
 
             song = self.musicQueue[id][self.queueIndex[id]][0]
             message = self.now_playing_embed(ctx, song)
@@ -96,9 +97,9 @@ class Music(commands.Cog):
 
             self.vc[id].play(discord.FFmpegPCMAudio(song['url'], **self.FFMPEG_OPTIONS), after=lambda e: self.play_next(ctx))
         else:
-            await ctx.send("There are no songs to be played in the queue.")
             self.queueIndex[id] += 1
             self.is_playing[id] = False
+            await ctx.send("There are no songs to be played in the queue.")
     
     def search(self, arg):
         videosSearch = VideosSearch(arg, limit = 1)
@@ -119,7 +120,7 @@ class Music(commands.Cog):
             self.is_playing[id] = False
             self.musicQueue[id] = []
             self.queueIndex[id] = 0
-        logging.info(f"Music cog initialized! ID: {id}")
+            logging.info(f"Music cog initialized! ID: {id}")
 
     @commands.command()
     async def join(self, ctx):
@@ -191,6 +192,8 @@ class Music(commands.Cog):
             self.is_playing[id] = False
             self.is_paused[id] = True
             self.vc[id].pause()
+        else:
+            await ctx.send("Error handling number: 100001")
 
     @commands.command(
         name="resume",
@@ -208,6 +211,8 @@ class Music(commands.Cog):
             self.is_playing[id] = True
             self.is_paused[id] = False
             self.vc[id].resume()
+        else:
+            await ctx.send("Error handling number: 100002")
 
     @commands.command(
         name="skip",
@@ -220,14 +225,22 @@ class Music(commands.Cog):
             await ctx.send("You are not in a voice channel.")
         elif ctx.author.voice.channel != self.vc[id].channel:
             await ctx.send("You need to be in the same voice channel to use this command.")
-        elif self.queueIndex[id] >= len(self.musicQueue[id]) - 1:
+        elif self.queueIndex[id] == len(self.musicQueue[id]) - 1:
+            self.vc[id].pause()
+            self.queueIndex[id] += 1
+            self.is_paused[id] = True
+            self.is_playing[id] = False
+            await ctx.send("Song skipped, no more songs in the queue.")
+        elif self.vc[id] and self.vc[id].is_playing():
             self.vc[id].pause()
             self.queueIndex[id] += 1
             await self.play_music(ctx)
-        elif self.vc[id] != None and self.vc[id]:
-            self.vc[id].pause()
-            self.queueIndex[id] += 1
-            await self.play_music(ctx)
+            await ctx.send("Song skipped.")
+        elif self.queueIndex[id] > len(self.musicQueue[id]) - 1:
+            pass
+#            await ctx.send("Queue index out of range.")
+        else:
+            await ctx.send("Error handling number: 100003")
 
     @commands.command(
         name="queue",
@@ -249,7 +262,7 @@ class Music(commands.Cog):
                 returnIndex = "Playing"
             else:
                 returnIndex = ""
-            returnValue += f"{returnIndex} - [{self.musicQueue[id][i][0]['title']}]({self.musicQueue[id][i][0]['url']})\n"
+            returnValue += f"{returnIndex} - [{self.musicQueue[id][i][0]['title']}]({self.musicQueue[id][i][0]['webpage_url']})\n"
             if returnValue == "":
                 await ctx.send("There are no songs in the queue.")
                 return

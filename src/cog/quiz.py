@@ -3,6 +3,15 @@ from config import *
 class Quiz(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+
+    @commands.command()
+    async def code(self, ctx, arg):
+        match arg:
+            case 'country':
+                response = get_response('quiz-code')
+                await send_response(ctx, response, True)
+            case _:
+                return
     
     @commands.command()
     async def div(self, ctx, arg):
@@ -18,15 +27,6 @@ class Quiz(commands.Cog):
         match arg:
             case 'country':
                 response = get_response('quiz-flag')
-                await send_response(ctx, response, True)
-            case _:
-                return
-
-    @commands.command()
-    async def code(self, ctx, arg):
-        match arg:
-            case 'country':
-                response = get_response('quiz-code')
                 await send_response(ctx, response, True)
             case _:
                 return

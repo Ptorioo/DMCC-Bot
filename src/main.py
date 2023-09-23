@@ -24,8 +24,8 @@ async def reload(ctx):
     for cog_file in os.listdir(COG_DIR):
         if cog_file.endswith('.py'):
             await bot.reload_extension(f'cog.{cog_file[:-3]}')
-    logging.info(f"{bot.user.name} is now refreshed!")
-    await ctx.send(f"{bot.user.name} is now refreshed!")
+    logging.info(f"{bot.user.name} is now reloaded!")
+    await ctx.send(f"{bot.user.name} is now reloaded!")
 
 if __name__ == '__main__':
     asyncio.run(init())

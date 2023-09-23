@@ -58,6 +58,11 @@ def get_response(arg):
                 color=0x00ff00
             )
             embed.add_field(
+                name='Area Code Quizzes',
+                value='`!code country` full list of countries available \n `!code *insert country*` quiz of requested country',
+                inline=False
+            )
+            embed.add_field(
                 name='Division Quizzes',
                 value='`!div country` full list of countries available \n `!div *insert country*` quiz of requested country',
                 inline=False
@@ -65,11 +70,6 @@ def get_response(arg):
             embed.add_field(
                 name='Divisional Flag Quizzes',
                 value='`!flag country` full list of countries available \n `!flag *insert country*` quiz of requested country',
-                inline=False
-            )
-            embed.add_field(
-                name='Area Code Quizzes',
-                value='`!code country` full list of countries available \n `!code *insert country*` quiz of requested country',
                 inline=False
             )
             embed.add_field(
@@ -86,8 +86,23 @@ def get_response(arg):
                 color=0x00ff00
             )
             embed.add_field(
+                name='Clear',
+                value='`!clear`, `!c` clear the current queue',
+                inline=False
+            )
+            embed.add_field(
                 name='Join',
                 value='`!join` join the voice channel',
+                inline=False
+            )
+            embed.add_field(
+                name='Leave',
+                value='`!leave`, `!disconnect` disconnect from the current voice channel',
+                inline=False
+            )
+            embed.add_field(
+                name='Pause',
+                value='`!pause`, `!stop` pause the current queue',
                 inline=False
             )
             embed.add_field(
@@ -96,8 +111,8 @@ def get_response(arg):
                 inline=False
             )
             embed.add_field(
-                name='Pause',
-                value='`!pause`, `!stop` pause the current queue',
+                name='Queue',
+                value='`!queue`, `!q` show the current queue',
                 inline=False
             )
             embed.add_field(
@@ -108,21 +123,6 @@ def get_response(arg):
             embed.add_field(
                 name='Skip',
                 value='`!skip`, `!s` skip the current song',
-                inline=False
-            )
-            embed.add_field(
-                name='Queue',
-                value='`!queue`, `!q` show the current queue',
-                inline=False
-            )
-            embed.add_field(
-                name='Clear',
-                value='`!clear`, `!c` clear the current queue',
-                inline=False
-            )
-            embed.add_field(
-                name='Leave',
-                value='`!leave`, `!disconnect` disconnect from the current voice channel',
                 inline=False
             )
             embed.set_footer(text='Feel free to give me feedback!')
