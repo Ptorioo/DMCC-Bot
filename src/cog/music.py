@@ -271,38 +271,40 @@ class Music(commands.Cog):
 
         if not ctx.author.voice:
             await ctx.send("You are not in a voice channel.")
+            return
         elif self.vc[id] != None:
             if ctx.author.voice.channel != self.vc[id].channel:
                 await ctx.send("You need to be in the same voice channel to use this command.")
+                return
+            else:
+                pass
+        
+        channel = ctx.author.voice.channel
+        if not args:
+            if len(self.musicQueue[id]) == 0:
+                await ctx.send("There are no song to be played in the queue.")
+                return
+            elif not self.is_playing[id]:
+                if self.musicQueue[id] == None or self.vc[id] == None:
+                    await self.play_music(ctx)
+                else:
+                    self.is_paused[id] = False
+                    self.is_playing[id] = True
+                    self.vc[id].resume()
+                    await ctx.send("The music is now playing!")
             else:
                 return
         else:
-            channel = ctx.author.voice.channel
-            if not args:
-                if len(self.musicQueue[id]) == 0:
-                    await ctx.send("There are no song to be played in the queue.")
-                    return
-                elif not self.is_playing[id]:
-                    if self.musicQueue[id] == None or self.vc[id] == None:
-                        await self.play_music(ctx)
-                    else:
-                        self.is_paused[id] = False
-                        self.is_playing[id] = True
-                        self.vc[id].resume()
-                        await ctx.send("The music is now playing!")
-                else:
-                    return
+            song = self.search(arg)
+            if type(song) == type(True):
+                await ctx.send("Could not load the song.")
             else:
-                song = self.search(arg)
-                if type(song) == type(True):
-                    await ctx.send("Could not load the song.")
-                else:
-                    self.musicQueue[id].append([song, channel])
+                self.musicQueue[id].append([song, channel])
 
-                    if not self.is_playing[id]:
-                        await self.play_music(ctx)
-                    else:
-                        await ctx.send("Added to queue.")
+                if not self.is_playing[id]:
+                    await self.play_music(ctx)
+                else:
+                    await ctx.send("Added to queue.")
 
 async def setup(bot):
     await bot.add_cog(Music(bot))
