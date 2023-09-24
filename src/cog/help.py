@@ -35,7 +35,7 @@ def get_response(arg):
     match arg:
         case 'help':
             embed = discord.Embed(
-                title='Welcome to 社長會紅!',
+                title='Welcome to DMCC Bot!',
                 description='I am a multi-purpose bot created by @lemniscape. \n Find out more about me by using the subcategory help commands listed below!',
                 color=0x00ff00
             )
