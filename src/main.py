@@ -34,7 +34,7 @@ def home():
     return "Server is up and running!"
 
 def run():
-    serve(app, host="0.0.0.0", port=1884)
+    serve(app, host="0.0.0.0", port=1884, _quiet=True)
 
 def keep_alive():
     t = Thread(target=run)

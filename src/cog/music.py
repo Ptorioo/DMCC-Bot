@@ -132,6 +132,26 @@ class Music(commands.Cog):
         self.queueIndex[id] = 0
         logging.info(f"Music cog initialized! ID: {id}")
 
+    @commands.Cog.listener()
+    async def on_voice_state_update(self, member, before, after):
+        id = int(member.guild.id)
+        if member.id == self.bot.user.id and before.channel == None and after.channel != None:
+            cooldownMinutes = 1
+            time = 0
+            while True:
+                await asyncio.sleep(1)
+                time += 1
+                if self.is_playing[id] and not self.is_paused[id]:
+                    time = 0
+                if time >= cooldownMinutes * 60:
+                    self.is_playing[id] = False
+                    self.is_paused[id] = False
+                    self.musicQueue[id] = []
+                    self.queueIndex[id] = 0
+                    await self.vc[id].disconnect()
+                if self.vc[id] == None or not self.vc[id].is_connected():
+                    break
+
     @commands.command()
     async def join(self, ctx):
         id = int(ctx.guild.id)
