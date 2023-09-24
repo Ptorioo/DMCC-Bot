@@ -50,6 +50,7 @@ pip install youtube-search-python
 pip install ffmpeg
 pip install flask
 pip install PyNaCl
+pip install waitress
 
 touch CONFIG.json
 (
