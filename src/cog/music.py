@@ -9,6 +9,7 @@ class Music(commands.Cog):
         self.is_playing = {}
         self.musicQueue = {}
         self.queueIndex = {}
+        self.duration = {}
 
         self.FFMPEG_OPTIONS = {
             'before_options':
@@ -40,18 +41,28 @@ class Music(commands.Cog):
             await self.vc[id].move_to(channel)
 
     def now_playing_embed(self, ctx, song):
+        id = int(ctx.guild.id)
         title = song['title']
         link = song['webpage_url']
         thumbnail = song['thumbnail']
-        avatar = ctx.author.avatar
+        author = self.musicQueue[id][self.queueIndex[id]][2]
+        avatar = author.avatar
+
+        elapsed = self.duration[id][1] - self.duration[id][0]
+        duration = self.duration[id][2]
+        progress = int(20 * (elapsed / duration))
+        m_e, s_e = divmod(int(elapsed), 60)
+        m_d, s_d = divmod(duration, 60)
 
         embed = discord.Embed(
             title="Now Playing",
             description=f'[{title}]({link})',
             colour=0x00ff00,
         )
+
+        embed.add_field(name='', value='`' + progress*'▬' + '🔘' + (20-progress)*'▬' + '`' + f'   {m_e}:{s_e:0>2d} / {m_d}:{s_d}', inline=False)
         embed.set_thumbnail(url=thumbnail)
-        embed.set_footer(text=f'Song added by: {str(ctx.author)}', icon_url=avatar)
+        embed.set_footer(text=f'Song added by: {str(author)}', icon_url=avatar)
         return embed
 
     def play_next(self, ctx):
@@ -63,6 +74,8 @@ class Music(commands.Cog):
             self.is_playing[id] = True
 
             song = self.musicQueue[id][self.queueIndex[id]][0]
+            self.duration[id] = [time.time(), time.time(), song['duration']]
+
             message = self.now_playing_embed(ctx, song)
             coro = ctx.send(embed=message)
             fut = asyncio.run_coroutine_threadsafe(coro, self.bot.loop)
@@ -75,6 +88,7 @@ class Music(commands.Cog):
         else:
             self.queueIndex[id] += 1
             self.is_playing[id] = False
+            self.duration[id] = []
             coro = ctx.send("There are no songs to be played in the queue.")
             fut = asyncio.run_coroutine_threadsafe(coro, self.bot.loop)
             try:
@@ -92,15 +106,17 @@ class Music(commands.Cog):
                 await self.joinVC(ctx, self.musicQueue[id][self.queueIndex[id]][1])
 
             song = self.musicQueue[id][self.queueIndex[id]][0]
+            self.duration[id] = [time.time(), time.time(), song['duration']]
+
             message = self.now_playing_embed(ctx, song)
             await ctx.send(embed=message)
 
             self.vc[id].play(discord.FFmpegPCMAudio(song['url'], **self.FFMPEG_OPTIONS), after=lambda e: self.play_next(ctx))
         else:
-            self.queueIndex[id] += 1
             self.is_playing[id] = False
+            self.duration[id] = []
             await ctx.send("There are no songs to be played in the queue.")
-    
+
     def search(self, arg):
         videosSearch = VideosSearch(arg, limit = 1)
         results = videosSearch.result()
@@ -110,7 +126,15 @@ class Music(commands.Cog):
         with yt_dlp.YoutubeDL(self.ydl_opts) as ydl:
             song = ydl.extract_info(url, download=False)
             return song
-            
+
+    async def on_time_update(self):
+        while True:
+            for guild in self.bot.guilds:
+                id = int(guild.id)
+                if not self.is_paused[id] and len(self.duration[id]) > 0:
+                    self.duration[id][1] = time.time()
+            await asyncio.sleep(1)
+
     @commands.Cog.listener()
     async def on_ready(self):
         for guild in self.bot.guilds:
@@ -120,7 +144,9 @@ class Music(commands.Cog):
             self.is_playing[id] = False
             self.musicQueue[id] = []
             self.queueIndex[id] = 0
+            self.duration[id] = []
             logging.info(f"Music cog initialized! ID: {id}")
+        await self.on_time_update()
     
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
@@ -130,13 +156,27 @@ class Music(commands.Cog):
         self.is_playing[id] = False
         self.musicQueue[id] = []
         self.queueIndex[id] = 0
-        logging.info(f"Music cog initialized! ID: {id}")
+        self.duration[id] = []
+        logging.info(f"Music cog initialized from joining a new server! ID: {id}")
+    
+    @commands.Cog.listener()
+    async def on_guild_remove(self, guild):
+        id = int(guild.id)
+        self.vc[id] = None
+        self.is_paused[id] = False
+        self.is_playing[id] = False
+        self.musicQueue[id] = []
+        self.queueIndex[id] = 0
+        self.duration[id] = []
+        logging.info(f"Music cog reset from leaving a server! ID: {id}")    
 
     @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after):
         id = int(member.guild.id)
-        if member.id == self.bot.user.id and before.channel == None and after.channel != None:
-            cooldownMinutes = 1
+        if not member.id == self.bot.user.id:
+            return
+        elif before.channel == None:
+            cooldownMinutes = 5
             time = 0
             while True:
                 await asyncio.sleep(1)
@@ -148,6 +188,7 @@ class Music(commands.Cog):
                     self.is_paused[id] = False
                     self.musicQueue[id] = []
                     self.queueIndex[id] = 0
+                    self.duration[id] = []
                     await self.vc[id].disconnect()
                 if self.vc[id] == None or not self.vc[id].is_connected():
                     break
@@ -181,6 +222,7 @@ class Music(commands.Cog):
             self.is_playing[id] = self.is_paused[id] = False
             self.musicQueue[id] = []
             self.queueIndex[id] = 0
+            self.duration[id] = []
             if self.vc[id] != None:
                 await self.vc[id].disconnect()
                 self.vc[id] = None
@@ -205,6 +247,7 @@ class Music(commands.Cog):
                 await ctx.send("The music queue has been cleared.")
                 self.musicQueue[id] = []
             self.queueIndex[id] = 0
+            self.duration[id] = []
 
     @commands.command(
         name="pause",
@@ -218,10 +261,10 @@ class Music(commands.Cog):
         elif ctx.author.voice.channel != self.vc[id].channel:
             await ctx.send("You need to be in the same voice channel to use this command.")
         elif self.is_playing[id]:
-            await ctx.send("Music paused!")
             self.is_playing[id] = False
             self.is_paused[id] = True
             self.vc[id].pause()
+            await ctx.send("Music paused!")
         else:
             await ctx.send("Error handling number: 100001")
 
@@ -237,12 +280,30 @@ class Music(commands.Cog):
         elif ctx.author.voice.channel != self.vc[id].channel:
             await ctx.send("You need to be in the same voice channel to use this command.")
         elif self.is_paused[id]:
-            await ctx.send("The music is now playing!")
             self.is_playing[id] = True
             self.is_paused[id] = False
             self.vc[id].resume()
+            await ctx.send("The music is now playing!")
         else:
             await ctx.send("Error handling number: 100002")
+
+    @commands.command(
+        name="nowplaying",
+        aliases=["np"],
+        help=""
+    )
+    async def nowplaying(self, ctx):
+        id = int(ctx.guild.id)
+        if not ctx.author.voice:
+            await ctx.send("You are not in a voice channel.")
+        elif ctx.author.voice.channel != self.vc[id].channel:
+            await ctx.send("You need to be in the same voice channel to use this command.")
+        elif self.is_playing[id]:
+            song = self.musicQueue[id][self.queueIndex[id]][0]
+            message = self.now_playing_embed(ctx, song)
+            await ctx.send(embed=message)
+        else:
+            return
 
     @commands.command(
         name="skip",
@@ -260,8 +321,9 @@ class Music(commands.Cog):
             self.queueIndex[id] += 1
             self.is_paused[id] = True
             self.is_playing[id] = False
+            self.duration[id] = []
             await ctx.send("Song skipped, no more songs in the queue.")
-        elif self.vc[id] and self.vc[id].is_playing():
+        elif self.vc[id] and self.is_playing[id]:
             self.vc[id].pause()
             self.queueIndex[id] += 1
             await self.play_music(ctx)
@@ -328,13 +390,10 @@ class Music(commands.Cog):
                 await ctx.send("There are no song to be played in the queue.")
                 return
             elif not self.is_playing[id]:
-                if self.musicQueue[id] == None or self.vc[id] == None:
-                    await self.play_music(ctx)
+                if len(self.musicQueue[id]) > 0:
+                        await self.play_music(ctx)
                 else:
-                    self.is_paused[id] = False
-                    self.is_playing[id] = True
-                    self.vc[id].resume()
-                    await ctx.send("The music is now playing!")
+                    return
             else:
                 return
         else:
@@ -342,7 +401,7 @@ class Music(commands.Cog):
             if type(song) == type(True):
                 await ctx.send("Could not load the song.")
             else:
-                self.musicQueue[id].append([song, channel])
+                self.musicQueue[id].append([song, channel, ctx.author])
 
                 if not self.is_playing[id]:
                     await self.play_music(ctx)

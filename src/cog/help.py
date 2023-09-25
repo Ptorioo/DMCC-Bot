@@ -107,7 +107,7 @@ def get_response(arg):
             )
             embed.add_field(
                 name='Play',
-                value='`!play`,`!p` play the song given an url or search keyword',
+                value='`!play`,`!p` play the song given an url or search keyword \n`!nowplaying`,`!np` show which song is playing in the voice channel',
                 inline=False
             )
             embed.add_field(
