@@ -26,6 +26,7 @@ async def reload(ctx):
             await bot.reload_extension(f'cog.{cog_file[:-3]}')
     logging.info(f"{bot.user.name} is now reloaded!")
     await ctx.send(f"{bot.user.name} is now reloaded!")
+    await bot.get_cog('Music')._init()
 
 app = Flask('__name__')
 

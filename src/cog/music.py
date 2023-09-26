@@ -28,6 +28,18 @@ class Music(commands.Cog):
             }]
         }
     
+    async def _init(self):
+        for guild in self.bot.guilds:
+            id = int(guild.id)
+            self.vc[id] = None
+            self.is_paused[id] = False
+            self.is_playing[id] = False
+            self.musicQueue[id] = []
+            self.queueIndex[id] = 0
+            self.duration[id] = []
+            logging.info(f"Music cog initialized! ID: {id}")
+        await self.on_time_update()
+
     async def joinVC(self, ctx, channel):
         id = int(ctx.guild.id)
         if self.vc[id] == None or not self.vc[id].is_connected():
@@ -50,7 +62,7 @@ class Music(commands.Cog):
 
         elapsed = self.duration[id][1] - self.duration[id][0]
         duration = self.duration[id][2]
-        progress = int(20 * (elapsed / duration))
+        progress = round(20 * (elapsed / duration))
         m_e, s_e = divmod(int(elapsed), 60)
         m_d, s_d = divmod(duration, 60)
 
@@ -137,16 +149,7 @@ class Music(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        for guild in self.bot.guilds:
-            id = int(guild.id)
-            self.vc[id] = None
-            self.is_paused[id] = False
-            self.is_playing[id] = False
-            self.musicQueue[id] = []
-            self.queueIndex[id] = 0
-            self.duration[id] = []
-            logging.info(f"Music cog initialized! ID: {id}")
-        await self.on_time_update()
+        await self._init()
     
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
@@ -176,8 +179,12 @@ class Music(commands.Cog):
         if not member.id == self.bot.user.id:
             return
         elif before.channel == None:
+            if member.guild.me.guild_permissions.deafen_members:
+                await member.edit(deafen=True)
+            
             cooldownMinutes = 5
             time = 0
+
             while True:
                 await asyncio.sleep(1)
                 time += 1
@@ -351,10 +358,10 @@ class Music(commands.Cog):
                 break
             returnIndex = i - self.queueIndex[id]
             if returnIndex == 0:
-                returnIndex = "Playing"
+                returnIndex = "Playing - "
             else:
-                returnIndex = ""
-            returnValue += f"{returnIndex} - [{self.musicQueue[id][i][0]['title']}]({self.musicQueue[id][i][0]['webpage_url']})\n"
+                returnIndex = "- "
+            returnValue += f"{returnIndex}[{self.musicQueue[id][i][0]['title']}]({self.musicQueue[id][i][0]['webpage_url']})\n"
             if returnValue == "":
                 await ctx.send("There are no songs in the queue.")
                 return
