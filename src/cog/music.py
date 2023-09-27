@@ -82,7 +82,7 @@ class Music(commands.Cog):
             colour=0x00ff00,
         )
 
-        embed.add_field(name='', value='`' + progress*'▬' + '🔘' + (20-progress)*'▬' + '`' + f'   {m_e}:{s_e:0>2d} / {m_d}:{s_d}', inline=False)
+        embed.add_field(name='', value='`' + progress*'▬' + '🔘' + (20-progress)*'▬' + '`' + f'   {m_e}:{s_e:0>2d} / {m_d}:{s_d:0>2d}', inline=False)
         embed.set_thumbnail(url=thumbnail)
         embed.set_footer(text=f'Song added by: {str(author)}', icon_url=avatar)
         return embed
@@ -226,7 +226,7 @@ class Music(commands.Cog):
 
     @commands.command(
         name="leave",
-        aliases=["disconnect"],
+        aliases=["dc", "disconnect"],
         help=""
     )
     async def leave(self, ctx):

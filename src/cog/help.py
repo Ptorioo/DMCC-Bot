@@ -97,7 +97,7 @@ def get_response(arg):
             )
             embed.add_field(
                 name='Leave',
-                value='`!leave`, `!disconnect` disconnect from the current voice channel',
+                value='`!leave`, `!dc`, `!disconnect` disconnect from the current voice channel',
                 inline=False
             )
             embed.add_field(
