@@ -21,6 +21,8 @@ async def on_command_error(ctx, error):
 @bot.command()
 @commands.is_owner()
 async def reload(ctx):
+    if bot.get_cog('Music'):
+        await bot.get_cog('Music')._init_leave()
     for cog_file in os.listdir(COG_DIR):
         if cog_file.endswith('.py'):
             await bot.reload_extension(f'cog.{cog_file[:-3]}')

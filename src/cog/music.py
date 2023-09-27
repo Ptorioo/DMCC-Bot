@@ -27,7 +27,7 @@ class Music(commands.Cog):
                 'preferredquality': '192',
             }]
         }
-    
+
     async def _init(self):
         for guild in self.bot.guilds:
             id = int(guild.id)
@@ -39,7 +39,16 @@ class Music(commands.Cog):
             self.duration[id] = []
             logging.info(f"Music cog initialized! ID: {id}")
         await self.on_time_update()
-
+    
+    async def _init_leave(self):
+        for guild in self.bot.guilds:
+            id = int(guild.id)
+            if self.vc[id] != None:
+                await self.vc[id].disconnect()
+                self.vc[id] = None
+            else:
+                return
+    
     async def joinVC(self, ctx, channel):
         id = int(ctx.guild.id)
         if self.vc[id] == None or not self.vc[id].is_connected():
@@ -51,6 +60,7 @@ class Music(commands.Cog):
                 return
         else:
             await self.vc[id].move_to(channel)
+            await ctx.guild.change_voice_state(channel=channel, self_mute=False, self_deaf=True)
 
     def now_playing_embed(self, ctx, song):
         id = int(ctx.guild.id)
@@ -225,15 +235,16 @@ class Music(commands.Cog):
             await ctx.send("You are not in a voice channel.")
         elif ctx.author.voice.channel != self.vc[id].channel:
             await ctx.send("You need to be in the same voice channel to use this command.")
-        else:
+        elif self.vc[id] != None:
             self.is_playing[id] = self.is_paused[id] = False
             self.musicQueue[id] = []
             self.queueIndex[id] = 0
             self.duration[id] = []
-            if self.vc[id] != None:
-                await self.vc[id].disconnect()
-                self.vc[id] = None
-                await ctx.send("Disconnected successfully.")
+            await self.vc[id].disconnect()
+            self.vc[id] = None
+            await ctx.send("Disconnected successfully.")
+        else:
+            return
 
     @commands.command(
         name="clear",
