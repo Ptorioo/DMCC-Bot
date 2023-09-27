@@ -1,6 +1,8 @@
 from config import *
 import status
 
+load_dotenv()
+
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix=PREFIX, owner_ids=set(OWNERS), intents=intents)
 
