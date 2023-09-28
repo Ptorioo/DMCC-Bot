@@ -20,12 +20,13 @@ $(VERBOSE).SILENT:
 
 .DEFAULT_GOAL := help
 
-PYTHON ?= python3.10
+# Change this to your Python interpreter path if needed
+PYTHON := python
 
 ROOT_DIR:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 
 ifneq ($(wildcard $(ROOT_DIR)/.venv/.),)
-	VENV_PYTHON = $(ROOT_DIR)/.venv/bin/python
+	VENV_PYTHON = $(ROOT_DIR)/.venv/Scripts/python
 else
 	VENV_PYTHON = $(PYTHON)
 endif
@@ -59,16 +60,16 @@ stylediff:
 
 newenv:
 	$(PYTHON) -m venv --clear .venv
-	.venv/bin/python3.10.exe -m pip install -U pip wheel
-	.venv/bin/pip install --upgrade pip
-	.venv/bin/pip install --upgrade setuptools
-	.venv/bin/pip install --upgrade setuptools wheel
+	.venv/Scripts/python.exe -m pip install -U pip wheel
+	.venv/Scripts/pip install --upgrade pip
+	.venv/Scripts/pip install --upgrade setuptools
+	.venv/Scripts/pip install --upgrade setuptools wheel
 	$(MAKE) syncenv
 .PHONY: newenv
 
 syncenv:
-	SETUPTOOLS_USE_DISTUTILS=stdlib .venv/bin/pip install -r ./requirements.txt
-	SETUPTOOLS_USE_DISTUTILS=stdlib .venv/bin/pip install -r ./tools/requirements.txt
+	SETUPTOOLS_USE_DISTUTILS=stdlib .venv/Scripts/pip install -r ./requirements.txt
+	SETUPTOOLS_USE_DISTUTILS=stdlib .venv/Scripts/pip install -r ./tools/requirements.txt
 .PHONY: syncenv
 
 help:
