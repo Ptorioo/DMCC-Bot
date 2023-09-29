@@ -1,5 +1,6 @@
 from config import *
-
+from youtubesearchpython import VideosSearch
+import yt_dlp
 
 class Music(commands.Cog):
     def __init__(self, bot):

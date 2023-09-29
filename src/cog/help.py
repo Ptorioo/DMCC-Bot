@@ -1,6 +1,5 @@
 from config import *
 
-
 class Help(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -13,17 +12,15 @@ class Help(commands.Cog):
         elif arg[0] == "music":
             response = get_response("help-music")
             await send_response(ctx, response, True)
-        elif arg[0] == "quiz":
-            response = get_response("help-quiz")
+        elif arg[0] == "search":
+            response = get_response("help-search")
             await send_response(ctx, response, True)
         else:
             return
 
-
 async def setup(bot):
     bot.remove_command("help")
     await bot.add_cog(Help(bot))
-
 
 async def send_response(ctx, response, isEmbed):
     if not ctx.guild:
@@ -33,7 +30,6 @@ async def send_response(ctx, response, isEmbed):
             await ctx.send(embed=response)
         else:
             await ctx.send(response)
-
 
 def get_response(arg):
     match arg:
@@ -48,41 +44,14 @@ def get_response(arg):
                 value="`!help music` info about the music commands",
                 inline=False,
             )
-            #            embed.add_field(
-            #                name='Quiz',
-            #                value='`!help quiz` info about the geography quizzes',
-            #                inline=False
-            #            )
-            embed.set_footer(text="Feel free to give me feedback!")
-            return embed
-        case "help-quiz":
-            embed = discord.Embed(
-                title="Quiz",
-                description="`!skip` skip the current question \n `!end` end the current quiz",
-                color=0x00FF00,
-            )
             embed.add_field(
-                name="Area Code Quizzes",
-                value="`!code country` full list of countries available \n `!code *insert country*` quiz of requested country",
-                inline=False,
-            )
-            embed.add_field(
-                name="Division Quizzes",
-                value="`!div country` full list of countries available \n `!div *insert country*` quiz of requested country",
-                inline=False,
-            )
-            embed.add_field(
-                name="Divisional Flag Quizzes",
-                value="`!flag country` full list of countries available \n `!flag *insert country*` quiz of requested country",
-                inline=False,
-            )
-            embed.add_field(
-                name="",
-                value="You have 30 seconds to answer the question. \n The game ends automatically after two unanswered rounds.",
-                inline=False,
+                name='Search',
+                value='`!help search` info about the search engine',
+                inline=False
             )
             embed.set_footer(text="Feel free to give me feedback!")
             return embed
+        
         case "help-music":
             embed = discord.Embed(title="Music", description="", color=0x00FF00)
             embed.add_field(
@@ -123,5 +92,16 @@ def get_response(arg):
             )
             embed.set_footer(text="Feel free to give me feedback!")
             return embed
+        
+        case "help-search":
+            embed = discord.Embed(title="Search", description="", color=0x00FF00)
+            embed.add_field(
+                name="Song Info",
+                value="`!songinfo`, `!si` search for the general info about the song",
+                inline=False,
+            )
+            embed.set_footer(text="Feel free to give me feedback!")
+            return embed
+        
         case _:
             return

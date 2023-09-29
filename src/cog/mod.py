@@ -1,7 +1,7 @@
 from config import *
 
 
-class DMCC(commands.Cog):
+class Mod(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -24,9 +24,5 @@ class DMCC(commands.Cog):
         arg = " ".join(args)
         await ctx.send(f"{role_mention}" + next_line * "\n" + f" {arg}")
 
-
-# TODO
-
-
 async def setup(bot):
-    await bot.add_cog(DMCC(bot))
+    await bot.add_cog(Mod(bot))
