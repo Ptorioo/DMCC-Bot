@@ -77,7 +77,7 @@ class Search(commands.Cog):
 
             if len(result) > 1:
                 filename = f'{result[0]} - {result[1]}.mid'
-                await ctx.send(file=discord.File(fp=result[16], filename=filename))
+                await ctx.send(file=discord.File(fp=result[-1], filename=filename))
             else:
                 await ctx.send(f"MIDI information not found, or there are multiple search results. Error code: {result[0]}")
         else:
