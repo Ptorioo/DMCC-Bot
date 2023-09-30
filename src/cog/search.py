@@ -33,7 +33,7 @@ class Search(commands.Cog):
 
             if len(info) > 1:
                 embed = discord.Embed(
-                    title="Search Result",
+                    title="Title",
                     description=info[1],
                     colour=0x00FF00
                 )
@@ -90,7 +90,49 @@ class Search(commands.Cog):
                 await ctx.send(f"MIDI information not found, or there are multiple search results. Error code: {result[0]}")
         else:
             await ctx.send("MIDI information not found.")
+    
+    @commands.command(
+        name='lyrics',
+        aliases=['lyr'],
+        help=''
+    )
+    async def lyrics(self, ctx, *args):
+        if not ctx.guild:
+            return
+        
+        arg = " ".join(args)
 
+        if arg:
+            sc = Scraper()
+            result = await sc.scrapeLyrics(ctx, arg)
+
+            await self.deleteDebugInfo(ctx)
+
+            if len(result) > 1:
+                embed = discord.Embed(
+                    title='Title',
+                    description=f'{result[0]} - {result[1]}',
+                    colour=0x00FF00
+                )
+
+                for i in range(3, len(result)):
+                    if i == 3:
+                        name = 'Lyrics'
+                    else:
+                        name = ''
+                    embed.add_field(
+                        name=name,
+                        value=f'{result[i]}',
+                        inline=False,
+                    )
+                
+                embed.set_thumbnail(url=result[2])
+                embed.set_footer(text=f"Search requested by: {str(ctx.author)}", icon_url=ctx.author.avatar)
+                await ctx.send(embed=embed)
+            else:
+                await ctx.send(f"Lyrics information not found. Error code: {result[0]}")
+        else:
+            await ctx.send("Lyrics information not found.")
 
 async def setup(bot):
     await bot.add_cog(Search(bot))

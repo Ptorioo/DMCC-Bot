@@ -22,3 +22,5 @@ OWNERS = configJSON["owners"]
 TOKEN = configJSON["token"]
 
 PREFIX = configJSON["prefix"]
+
+GENIUS_ACCESS_TOKEN = configJSON["genius-token"]
