@@ -44,20 +44,60 @@ class Search(commands.Cog):
                 )
                 embed.add_field(
                     name="Key: ",
-                    value=f"{info[8]}",
+                    value=f"{info[3]}",
                     inline=False,
                 )
                 embed.add_field(
                     name="BPM: ",
-                    value=f"{info[9]}",
+                    value=f"{info[4]}",
                     inline=False,
                 )
                 embed.add_field(
                     name="Duration: ",
+                    value=f"{info[5]}",
+                    inline=False,
+                )
+                embed.add_field(
+                    name="Loudness: ",
+                    value=f"{info[6]}",
+                    inline=False,
+                )
+                embed.add_field(
+                    name="Danceability: ",
+                    value=f"{info[7]}",
+                    inline=False,
+                )
+                embed.add_field(
+                    name="Energy: ",
+                    value=f"{info[8]}",
+                    inline=False,
+                )
+                embed.add_field(
+                    name="Speechiness: ",
+                    value=f"{info[9]}",
+                    inline=False,
+                )
+                embed.add_field(
+                    name="Acousticness: ",
+                    value=f"{info[10]}",
+                    inline=False,
+                )
+                embed.add_field(
+                    name="Instrumentalness: ",
+                    value=f"{info[11]}",
+                    inline=False,
+                )
+                embed.add_field(
+                    name="Liveness: ",
+                    value=f"{info[12]}",
+                    inline=False,
+                )
+                embed.add_field(
+                    name="Happiness: ",
                     value=f"{info[13]}",
                     inline=False,
                 )
-                embed.set_thumbnail(url='https://www.cprato.com' + info[5])
+                embed.set_thumbnail(url=info[2])
                 embed.set_footer(text=f"Search requested by: {str(ctx.author)}", icon_url=ctx.author.avatar)
                 await ctx.send(embed=embed)
             

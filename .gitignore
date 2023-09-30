@@ -2,3 +2,4 @@ CONFIG.json
 __pycache__
 .env
 .venv
+.cache

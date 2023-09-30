@@ -1,43 +1,62 @@
 from config import *
-import requests
 import io
+import spotipy
+import requests
 from bs4 import BeautifulSoup
+from spotipy.oauth2 import SpotifyClientCredentials
 
 class Scraper():
     def __init__(self):
-        self.headers = {'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36'}
-        self.search_url = 'https://www.cprato.com/en/midi/search/'
+        self.midi_url = 'https://www.cprato.com/en/midi/search/'
         self.GENIUS_API_BASE_URL = "https://api.genius.com"
         self.result = []
+        self.keyLst = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
+        self.mode = ['Minor', 'Major']
 
     async def scrapeInfo(self, ctx, query):        
         self.result = []
-        self.search_url += query
+        client_credentials_manager = SpotifyClientCredentials(client_id=SPOTIFY_ID, client_secret=SPOTIFY_TOKEN)
+        sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
         await ctx.send('Sending request...')
-        response = requests.get(self.search_url, headers = self.headers)
+        track_info = sp.search(q=query, type="track")
 
-        if response.status_code == 200:
-            await ctx.send('Successfully fetched website...')
-            soup = BeautifulSoup(response.content, 'html.parser')
-            if soup.find('div', class_='col-md-4 rounded mt-4'):
-                for com in soup.find_all('td'):
-                    if com.find('img'):
-                        self.result.append(com.find('img').get('src'))
-                    else:
-                        self.result.append(com.text.strip())
-            else:
-                self.result.append(0)
+        if track_info:
+            await ctx.send('Successfully fetched result...')
+            track = track_info['tracks']['items'][0]
+            audio_features = sp.audio_features([track['id']])
+            track_details = sp.track(track['id'])
+            album_details = sp.album(track_details['album']['id'])
+            
+            artist_name = ", ".join([artist['name'] for artist in track['artists']])
+            song_name = track['name']
+            cover_art_url = album_details['images'][0]['url']
+
+            key = self.keyLst[audio_features[0]['key']] + ' ' + self.mode[audio_features[0]['mode']]
+            bpm = round(audio_features[0]['tempo'])
+            m, s = divmod(round(audio_features[0]['duration_ms'] / 1000), 60)
+            duration = f'{m}:{s:0>2d}'
+            loudness = str(round(audio_features[0]['loudness'] * 10) / 10) + ' dB'
+            danceability = str(round(audio_features[0]['danceability'] * 100)) + '%'
+            energy = str(round(audio_features[0]['energy'] * 100)) + '%'
+            speechiness = str(round(audio_features[0]['speechiness'] * 100)) + '%'
+            acousticness = str(round(audio_features[0]['acousticness'] * 100)) + '%'
+            instrumentalness = str(round(audio_features[0]['instrumentalness'] * 100)) + '%'
+            liveness = str(round(audio_features[0]['liveness'] * 100)) + '%'
+            happiness = str(round(audio_features[0]['valence'] * 100)) + '%'
+
+            self.result.extend([artist_name, song_name, cover_art_url, key, bpm, duration, loudness, danceability, energy, speechiness, acousticness, instrumentalness, liveness, happiness])
             return self.result
+
         else:
-            await ctx.send('Failed to fetch website...')
-            self.result.append(response.status_code)
+            await ctx.send('No search results...')
+            self.result.append(0)
             return self.result
     
     async def scrapeMIDI(self, ctx, query):
         self.result = []
-        self.search_url += query
+        self.midi_url += query
         await ctx.send('Sending request...')
-        response = requests.get(self.search_url, headers = self.headers)
+        response = requests.get(self.midi_url, headers = self.headers)
 
         if response.status_code == 200:
             await ctx.send(f'Successfully fetched website...')
