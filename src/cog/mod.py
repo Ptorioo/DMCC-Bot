@@ -24,5 +24,6 @@ class Mod(commands.Cog):
         arg = " ".join(args)
         await ctx.send(f"{role_mention}" + next_line * "\n" + f" {arg}")
 
+
 async def setup(bot):
     await bot.add_cog(Mod(bot))

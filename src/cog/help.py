@@ -1,5 +1,6 @@
 from config import *
 
+
 class Help(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -18,9 +19,11 @@ class Help(commands.Cog):
         else:
             return
 
+
 async def setup(bot):
     bot.remove_command("help")
     await bot.add_cog(Help(bot))
+
 
 async def send_response(ctx, response, isEmbed):
     if not ctx.guild:
@@ -30,6 +33,7 @@ async def send_response(ctx, response, isEmbed):
             await ctx.send(embed=response)
         else:
             await ctx.send(response)
+
 
 def get_response(arg):
     match arg:
@@ -45,13 +49,13 @@ def get_response(arg):
                 inline=False,
             )
             embed.add_field(
-                name='Search',
-                value='`!help search` info about the search engine',
-                inline=False
+                name="Search",
+                value="`!help search` info about the search engine",
+                inline=False,
             )
             embed.set_footer(text="Feel free to give me feedback!")
             return embed
-        
+
         case "help-music":
             embed = discord.Embed(title="Music", description="", color=0x00FF00)
             embed.add_field(
@@ -92,7 +96,7 @@ def get_response(arg):
             )
             embed.set_footer(text="Feel free to give me feedback!")
             return embed
-        
+
         case "help-search":
             embed = discord.Embed(title="Search", description="", color=0x00FF00)
             embed.add_field(
@@ -112,6 +116,6 @@ def get_response(arg):
             )
             embed.set_footer(text="Feel free to give me feedback!")
             return embed
-        
+
         case _:
             return
