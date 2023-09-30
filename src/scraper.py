@@ -1,44 +1,67 @@
-import asyncio
-import logging
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
+import requests
+import io
+from bs4 import BeautifulSoup
 
 class Scraper():
     def __init__(self):
-        self.XPATH = '/html/body/div/main/div/div/div[1]/div[2]/a/'
+        self.headers = {'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36'}
+        self.search_url = 'https://www.cprato.com/en/midi/search/'
+        self.result = []
 
     async def scrapeInfo(self, ctx, query):        
-        options = Options()
-        options.add_argument("--headless")
+        self.result = []
+        self.search_url += query
+        await ctx.send('Sending request...')
+        response = requests.get(self.search_url, headers = self.headers)
 
-        driver = webdriver.Chrome(options=options)
-        driver.get('https://songbpm.com/')
-        await ctx.send("Scraping from the Internet...")
+        if response.status_code == 200:
+            await ctx.send('Successfully fetched website...')
+            soup = BeautifulSoup(response.content, 'html.parser')
+            if soup.find('div', class_='col-md-4 rounded mt-4'):
+                for com in soup.find_all('td'):
+                    if com.find('img'):
+                        self.result.append(com.find('img').get('src'))
+                    else:
+                        self.result.append(com.text.strip())
+            else:
+                self.result.append(0)
+            return self.result
+        else:
+            await ctx.send('Failed to fetch website...')
+            self.result.append(response.status_code)
+            return self.result
+    
+    async def scrapeMIDI(self, ctx, query):
+        self.result = []
+        self.search_url += query
+        await ctx.send('Sending request...')
+        response = requests.get(self.search_url, headers = self.headers)
+
+        if response.status_code == 200:
+            await ctx.send(f'Successfully fetched website...')
+            soup = BeautifulSoup(response.content, 'html.parser')
+            if soup.find('div', class_='col-md-4 rounded mt-4'):
+                for com in soup.find_all('td'):
+                    if com.find('a', class_='btn btn-success px-3 py-3'):
+                        self.result.append(com.find('a').get('href'))
+                    else:
+                        self.result.append(com.text.strip())
+            else:
+                self.result.append(0)
+                return self.result
+
+        else:
+            await ctx.send('Failed to fetch website...')
+            self.result.append(response.status_code)
+            return self.result
         
-        elem = driver.find_element(By.NAME, 'query')
-        elem.send_keys(query)
-        elem.send_keys(Keys.ENTER)
-        await ctx.send("Searching from query...")
+        download_url = 'https://www.cprato.com' + self.result[2]
+        download_url = download_url.replace("/download/", "/file/")
+        response_file = requests.get(download_url, stream=True)
 
-        try:
-            WebDriverWait(driver, 10).until(EC.url_contains("searches"))
-            
-            title = driver.find_element(By.XPATH, self.XPATH + 'div[1]/div[2]/p[2]').text
-            artist = driver.find_element(By.XPATH, self.XPATH + 'div[1]/div[2]/p[1]').text
-            key = driver.find_element(By.XPATH, self.XPATH + 'div[2]/div[1]/span[2]').text
-            bpm = driver.find_element(By.XPATH, self.XPATH + 'div[2]/div[3]/span[2]').text
-            duration = driver.find_element(By.XPATH, self.XPATH + 'div[2]/div[2]/span[2]').text
+        buffer = io.BytesIO()
+        buffer.write(response_file.content)
+        buffer.seek(0)
 
-            result = [title, artist, key, bpm, duration]
-            await ctx.send("Elements fetched...")
-            driver.close()
-            return result
-
-        except Exception as e:
-            logging.info(e)
-            driver.close()
-            return None
+        self.result.append(buffer)
+        return self.result

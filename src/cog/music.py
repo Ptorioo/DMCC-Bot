@@ -40,7 +40,6 @@ class Music(commands.Cog):
             self.musicQueue[id] = []
             self.queueIndex[id] = 0
             self.duration[id] = []
-            logging.info(f"Music cog initialized! ID: {id}")
         await self.on_time_update()
 
     async def _init_leave(self):

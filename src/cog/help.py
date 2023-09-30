@@ -100,6 +100,11 @@ def get_response(arg):
                 value="`!songinfo`, `!si` search for the general info about the song",
                 inline=False,
             )
+            embed.add_field(
+                name="MIDI Download",
+                value="`!midi`, `!mid` search for MIDI file of the song",
+                inline=False,
+            )
             embed.set_footer(text="Feel free to give me feedback!")
             return embed
         
