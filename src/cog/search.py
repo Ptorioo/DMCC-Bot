@@ -20,7 +20,11 @@ class Search(commands.Cog):
         help=''
     )
     async def songinfo(self, ctx, *args):
+        if not ctx.guild:
+            return
+        
         arg = " ".join(args)
+
         if arg:
             sc = Scraper()
             info = await sc.scrapeInfo(ctx, arg)
@@ -68,7 +72,11 @@ class Search(commands.Cog):
         help=''
     )
     async def midi(self, ctx, *args):
+        if not ctx.guild:
+            return
+
         arg = " ".join(args)
+
         if arg:
             sc = Scraper()
             result = await sc.scrapeMIDI(ctx, arg)

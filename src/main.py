@@ -25,7 +25,8 @@ async def on_ready():
 
 @bot.event
 async def on_command_error(ctx, error):
-    print(f"{ctx.guild.name}:  {error}")
+    if ctx.guild:
+        print(f"{ctx.guild.name}:  {error}")
 
 
 @bot.command()
