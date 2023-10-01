@@ -6,16 +6,10 @@ import discord
 import logging
 from discord.ext import commands, tasks
 
-CURRENT_DIR = os.path.dirname(__file__)
+config = os.environ.get('CONFIG_JSON')
 
-BASE_DIR = os.path.dirname(CURRENT_DIR)
-
-COG_DIR = os.path.join(CURRENT_DIR, "cog")
-
-CONFIG_FILE_PATH = os.path.join(CURRENT_DIR, "..", "CONFIG.json")
-
-with open(CONFIG_FILE_PATH) as f:
-    configJSON = json.load(f)
+if config:
+    configJSON = json.loads(config)
 
 OWNERS = configJSON["owners"]
 
