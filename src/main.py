@@ -1,9 +1,6 @@
 import status
 from config import *
 from dotenv import load_dotenv
-from flask import Flask
-from threading import Thread
-from waitress import serve
 
 load_dotenv()
 
@@ -41,25 +38,6 @@ async def reload(ctx):
     await ctx.send(f"{bot.user.name} is now reloaded!")
     await bot.get_cog("Music")._init()
 
-
-app = Flask("__name__")
-
-
-@app.route("/")
-def home():
-    return "Server is up and running!"
-
-
-def run():
-    serve(app, host="0.0.0.0", port=1884, _quiet=True)
-
-
-def keep_alive():
-    t = Thread(target=run)
-    t.start()
-
-
 if __name__ == "__main__":
     asyncio.run(init())
-    keep_alive()
     bot.run(TOKEN, root_logger=True)
