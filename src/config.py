@@ -28,3 +28,5 @@ GENIUS_ACCESS_TOKEN = configJSON["genius-token"]
 SPOTIFY_ID = configJSON["spotify-id"]
 
 SPOTIFY_TOKEN = configJSON["spotify-token"]
+
+PADLET_LINK = configJSON["padlet-link"]
