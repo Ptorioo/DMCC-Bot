@@ -12,7 +12,7 @@ bot = commands.Bot(command_prefix=PREFIX, owner_ids=set(OWNERS), intents=intents
 
 
 async def init():
-    for cog_file in os.listdir(COG_DIR):
+    for cog_file in os.listdir('src/cog'):
         if cog_file.endswith(".py"):
             await bot.load_extension(f"cog.{cog_file[:-3]}")
 
@@ -34,7 +34,7 @@ async def on_command_error(ctx, error):
 async def reload(ctx):
     if bot.get_cog("Music"):
         await bot.get_cog("Music")._init_leave()
-    for cog_file in os.listdir(COG_DIR):
+    for cog_file in os.listdir('src/cog'):
         if cog_file.endswith(".py"):
             await bot.reload_extension(f"cog.{cog_file[:-3]}")
     logging.info(f"{bot.user.name} is now reloaded!")
