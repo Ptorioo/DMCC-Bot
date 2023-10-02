@@ -20,7 +20,6 @@ $(VERBOSE).SILENT:
 
 .DEFAULT_GOAL := help
 
-# Change this to your Python interpreter path if needed
 UNAME := $(shell uname)
 
 ifeq ($(UNAME), Linux)
@@ -50,7 +49,7 @@ Commands:
   stylecheck                 Check which tracked .py files need reformatting.
   stylediff                  Show the post-reformat diff of the tracked .py files
                              without modifying them.
-  delenv					 Delete the current virtual environment.
+  delenv                     Delete the current virtual environment.
   newenv                     Create or replace this project's virtual environment.
   syncenv                    Sync this project's virtual environment to the latest
                              dependencies.
@@ -76,8 +75,9 @@ delenv:
 newenv:
 	$(VIRTUALENV_COMMAND)
 ifeq ($(UNAME), Linux)
+	rm -rf .venv/
 	$(PYTHON) -m venv .venv
-	$(PYTHON) -m pip install -U pip setuptools wheel
+	$(PYTHON) -m pip install -v -U pip setuptools wheel
 	$(MAKE) syncenv
 else
 	$(PYTHON) -m venv --clear .venv
@@ -88,11 +88,9 @@ endif
 
 syncenv:
 ifeq ($(UNAME), Linux)
-	.venv/bin/pip install -r ./requirements.txt
-	.venv/bin/pip install -r ./tools/requirements.txt
+	.venv/bin/pip3 install -v -r ./requirements.txt
 else
 	SETUPTOOLS_USE_DISTUTILS=stdlib .venv/Scripts/pip install -r ./requirements.txt
-	SETUPTOOLS_USE_DISTUTILS=stdlib .venv/Scripts/pip install -r ./tools/requirements.txt
 endif
 .PHONY: syncenv
 

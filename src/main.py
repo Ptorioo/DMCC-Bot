@@ -1,8 +1,6 @@
 import status
 from config import *
-from dotenv import load_dotenv
-
-load_dotenv()
+from flask import Flask
 
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix=PREFIX, owner_ids=set(OWNERS), intents=intents)
@@ -37,6 +35,12 @@ async def reload(ctx):
     logging.info(f"{bot.user.name} is now reloaded!")
     await ctx.send(f"{bot.user.name} is now reloaded!")
     await bot.get_cog("Music")._init()
+
+app = Flask('__name__')
+
+@app.route('/')
+def home():
+    return "Server is up and running!"
 
 if __name__ == "__main__":
     asyncio.run(init())
