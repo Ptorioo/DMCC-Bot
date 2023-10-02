@@ -44,4 +44,5 @@ def home():
 
 if __name__ == "__main__":
     asyncio.run(init())
+    app.run()
     bot.run(TOKEN, root_logger=True)
