@@ -1,6 +1,7 @@
 import src.status
 from src.config import *
 from flask import Flask
+from threading import Thread
 
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix=PREFIX, owner_ids=set(OWNERS), intents=intents)
@@ -42,7 +43,11 @@ app = Flask('__name__')
 def home():
     return "Server is up and running!"
 
+def keep_alive():
+    t = Thread(target=app.run())
+    t.start()
+
 if __name__ == "__main__":
     asyncio.run(init())
-    app.run()
+    keep_alive()
     bot.run(TOKEN, root_logger=True)
