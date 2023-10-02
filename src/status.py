@@ -1,4 +1,4 @@
-from config import *
+from src.config import *
 
 
 async def renew(bot):

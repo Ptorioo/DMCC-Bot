@@ -1,4 +1,4 @@
-from config import *
+from src.config import *
 from youtubesearchpython import VideosSearch
 import yt_dlp
 

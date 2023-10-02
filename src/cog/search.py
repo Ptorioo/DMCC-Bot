@@ -1,5 +1,5 @@
-from config import *
-from scraper import Scraper
+from src.config import *
+from src.scraper import Scraper
 
 
 class Search(commands.Cog):
