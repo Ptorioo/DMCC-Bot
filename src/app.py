@@ -44,10 +44,10 @@ def home():
     return "Server is up and running!"
 
 def keep_alive():
-    t = Thread(target=app.run())
+    t = Thread(target=app.run, kwargs={"host": "0.0.0.0", "port": 8080})
     t.start()
 
 if __name__ == "__main__":
-    asyncio.run(init())
     keep_alive()
+    asyncio.run(init())
     bot.run(TOKEN, root_logger=True)
