@@ -1,4 +1,4 @@
-from src.config import *
+from config import *
 import io
 import spotipy
 import requests
