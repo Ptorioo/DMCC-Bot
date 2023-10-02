@@ -1,5 +1,5 @@
-import status
-from config import *
+import src.status
+from src.config import *
 from flask import Flask
 
 intents = discord.Intents.all()
@@ -14,7 +14,7 @@ async def init():
 
 @bot.event
 async def on_ready():
-    bot.loop.create_task(status.renew(bot))
+    bot.loop.create_task(src.status.renew(bot))
     logging.info(f"{bot.user.name} is now running!")
 
 
