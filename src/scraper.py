@@ -82,7 +82,7 @@ class Scraper:
         self.result = []
         self.midi_url += query
         await ctx.send("Sending request...")
-        response = requests.get(self.midi_url, headers=self.headers)
+        response = requests.get(self.midi_url)
 
         if response.status_code == 200:
             await ctx.send(f"Successfully fetched website...")
