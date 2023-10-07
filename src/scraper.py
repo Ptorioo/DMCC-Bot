@@ -43,15 +43,6 @@ class Scraper:
             m, s = divmod(round(audio_features[0]["duration_ms"] / 1000), 60)
             duration = f"{m}:{s:0>2d}"
             loudness = str(round(audio_features[0]["loudness"] * 10) / 10) + " dB"
-            danceability = str(round(audio_features[0]["danceability"] * 100)) + "%"
-            energy = str(round(audio_features[0]["energy"] * 100)) + "%"
-            speechiness = str(round(audio_features[0]["speechiness"] * 100)) + "%"
-            acousticness = str(round(audio_features[0]["acousticness"] * 100)) + "%"
-            instrumentalness = (
-                str(round(audio_features[0]["instrumentalness"] * 100)) + "%"
-            )
-            liveness = str(round(audio_features[0]["liveness"] * 100)) + "%"
-            happiness = str(round(audio_features[0]["valence"] * 100)) + "%"
 
             self.result.extend(
                 [
@@ -61,14 +52,7 @@ class Scraper:
                     key,
                     bpm,
                     duration,
-                    loudness,
-                    danceability,
-                    energy,
-                    speechiness,
-                    acousticness,
-                    instrumentalness,
-                    liveness,
-                    happiness,
+                    loudness
                 ]
             )
             return self.result
