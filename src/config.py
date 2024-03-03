@@ -10,6 +10,9 @@ config = os.environ.get('CONFIG_JSON')
 
 if config:
     configJSON = json.loads(config)
+else:
+    with open('CONFIG.json', 'r') as j:
+        configJSON = json.loads(j.read())
 
 OWNERS = configJSON["owners"]
 

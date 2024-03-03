@@ -20,7 +20,7 @@ async def on_ready():
 @bot.event
 async def on_command_error(ctx, error):
     if ctx.guild:
-        print(f"{ctx.guild.name}:  {error}")
+        logging.info(f"{ctx.guild.name}:  {error}")
 
 
 @bot.command()

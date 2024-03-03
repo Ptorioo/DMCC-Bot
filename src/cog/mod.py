@@ -1,4 +1,5 @@
 from config import *
+import re
 import requests
 
 
@@ -58,6 +59,14 @@ class Mod(commands.Cog):
                 await ctx.send(result)
         else:
             await ctx.send('Invalid request.')
+    
+    @commands.Cog.listener()
+    async def on_message(self, message):
+        if "discord.gg" in message.content:
+            await message.delete()
+            embed = discord.Embed(title="Server Invite Link Blocked", description="Please contact administrators if this is a false report.", color=0x00FF00)
+            embed.set_footer(text=f"Server invite sent by: {str(message.author)}", icon_url=message.author.avatar)
+            await message.channel.send(embed=embed)
 
 
 async def setup(bot):
