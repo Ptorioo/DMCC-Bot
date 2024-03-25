@@ -41,6 +41,7 @@ class Mod(commands.Cog):
                 role_mention = role
 
         arg = " ".join(args)
+        await ctx.message.delete()
         await ctx.send(f"{role_mention}" + next_line * "\n" + f" {arg}")
     
     @commands.command()
