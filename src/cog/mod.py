@@ -1,5 +1,4 @@
 from config import *
-import re
 import requests
 
 
@@ -25,6 +24,7 @@ class Mod(commands.Cog):
         return result
 
     @commands.command()
+    @commands.is_owner()
     async def echo(self, ctx, role, *args):
         next_line = False
         if role.lower() == "everyone":
@@ -44,6 +44,7 @@ class Mod(commands.Cog):
         await ctx.send(f"{role_mention}" + next_line * "\n" + f" {arg}")
     
     @commands.command()
+    @commands.is_owner()
     async def padlet(self, ctx, *arg):
         if not arg:
             results = self.get_padlet(0)
