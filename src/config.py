@@ -20,10 +20,10 @@ TOKEN = configJSON["token"]
 
 PREFIX = configJSON["prefix"]
 
-GENIUS_ACCESS_TOKEN = configJSON["genius-token"]
+GENIUS_ACCESS_TOKEN = configJSON["genius_token"]
 
-SPOTIFY_ID = configJSON["spotify-id"]
+SPOTIFY_ID = configJSON["spotify_id"]
 
-SPOTIFY_TOKEN = configJSON["spotify-token"]
+SPOTIFY_TOKEN = configJSON["spotify_token"]
 
-PADLET_LINK = configJSON["padlet-link"]
+PADLET_LINK = configJSON["padlet_link"]
