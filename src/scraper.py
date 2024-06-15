@@ -99,7 +99,7 @@ class Scraper:
 
     async def scrapeLyrics(self, ctx, query):
         self.result = []
-        headers = {"Authorization": f"Bearer {GENIUS_ACCESS_TOKEN}"}
+        headers = {"Authorization": f"Bearer {GENIUS_TOKEN}"}
 
         await ctx.send("Sending request...")
         response = requests.get(

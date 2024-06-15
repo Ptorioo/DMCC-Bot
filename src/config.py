@@ -1,5 +1,4 @@
 import os
-import json
 import time
 import asyncio
 import discord
@@ -15,7 +14,7 @@ TOKEN = os.getenv("TOKEN")
 
 PREFIX = os.getenv("PREFIX")
 
-GENIUS_ACCESS_TOKEN = os.getenv("GENIUS_ACCESS_TOKEN")
+GENIUS_TOKEN = os.getenv("GENIUS_TOKEN")
 
 SPOTIFY_ID = os.getenv("SPOTIFY_ID")
 

@@ -2,8 +2,8 @@ import status
 from config import *
 
 intents = discord.Intents.all()
-bot = commands.Bot(command_prefix=PREFIX, owner_ids=set(OWNERS), intents=intents)
-
+owner_ids = set(map(int, OWNERS.split(',')))
+bot = commands.Bot(command_prefix=PREFIX, owner_ids=owner_ids, intents=intents)
 
 async def init():
     for cog_file in os.listdir('src/cog'):
