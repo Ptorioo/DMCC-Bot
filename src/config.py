@@ -5,25 +5,20 @@ import asyncio
 import discord
 import logging
 from discord.ext import commands, tasks
+from dotenv import load_dotenv
 
-config = os.environ.get('CONFIG_JSON')
+load_dotenv()
 
-if config:
-    configJSON = json.loads(config)
-else:
-    with open('CONFIG.json', 'r') as j:
-        configJSON = json.loads(j.read())
+OWNERS = os.getenv("OWNERS")
 
-OWNERS = configJSON["owners"]
+TOKEN = os.getenv("TOKEN")
 
-TOKEN = configJSON["token"]
+PREFIX = os.getenv("PREFIX")
 
-PREFIX = configJSON["prefix"]
+GENIUS_ACCESS_TOKEN = os.getenv("GENIUS_ACCESS_TOKEN")
 
-GENIUS_ACCESS_TOKEN = configJSON["genius-token"]
+SPOTIFY_ID = os.getenv("SPOTIFY_ID")
 
-SPOTIFY_ID = configJSON["spotify-id"]
+SPOTIFY_TOKEN = os.getenv("SPOTIFY_TOKEN")
 
-SPOTIFY_TOKEN = configJSON["spotify-token"]
-
-PADLET_LINK = configJSON["padlet-link"]
+PADLET_LINK = os.getenv("PADLET_LINK")
