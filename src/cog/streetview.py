@@ -1,7 +1,7 @@
 import os
 import random
 import discord
-import shapefile
+import overpy
 from shapely.geometry import Point, shape
 from config import *
 
@@ -71,12 +71,22 @@ class StreetView(commands.Cog):
         await ctx.send(file=file, embed=embed)
 
     def is_correct_guess(self, guessed_country):
-        shapefile_path = SHAPEFILE
-        sf = shapefile.Reader(shapefile_path, encoding='iso-8859-1')
-        for record, shape_rec in zip(sf.records(), sf.shapes()):
-            if record["NAME"].lower() == guessed_country or record["ISO2"].lower() == guessed_country:
-                if shape(shape_rec).contains(self.current_coords):
+        api = overpy.Overpass()
+        query = f"""
+        [out:json];
+        is_in({self.current_coords.y}, {self.current_coords.x});
+        area._[admin_level=2];
+        out body;
+        """
+        try:
+            result = api.query(query)
+            for element in result.areas:
+                if "name" in element.tags and element.tags["name"].lower() == guessed_country:
                     return True
+                if "ISO3166-1:alpha2" in element.tags and element.tags["ISO3166-1:alpha2"].lower() == guessed_country:
+                    return True
+        except overpy.exception.OverpassException as e:
+            print(f"Overpass API error: {e}")
         return False
 
 async def setup(bot):
