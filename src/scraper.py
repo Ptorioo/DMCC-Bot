@@ -2,8 +2,9 @@ from config import *
 import io
 import spotipy
 import requests
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, NavigableString, Tag
 from spotipy.oauth2 import SpotifyClientCredentials
+import re
 
 
 class Scraper:
@@ -125,20 +126,40 @@ class Scraper:
                     await ctx.send(f"Successfully fetched website...")
                     lyrics_page.raise_for_status()
                     soup = BeautifulSoup(lyrics_page.text, "html.parser")
+                    lyrics_container_pattern = re.compile(r"^(ReferentFragment-desktop__Highlight-sc-|Lyrics__Container-sc-)")
 
-                    for br in soup.find_all("br"):
-                        br.replace_with("\n")
+                    lines = []
 
-                    for com in soup.find_all(
-                        True,
-                        {
-                            "class": [
-                                "ReferentFragmentdesktop__Highlight-sc-110r0d9-1 jAzSMw",
-                                "Lyrics__Container-sc-1ynbvzw-1 kUgSbL",
-                            ]
-                        },
-                    ):
-                        self.result.append(com.text.strip())
+                    # Traverse each container
+                    for container in soup.find_all(True, class_=lyrics_container_pattern):
+                        buffer = ""
+                        for elem in container.descendants:
+                            if isinstance(elem, NavigableString):
+                                buffer += str(elem)
+                            elif isinstance(elem, Tag) and elem.name == "br":
+                                buffer += "\n"
+
+                        # Clean and split into lines
+                        for line in buffer.split("\n"):
+                            line = line.strip()
+                            if line:
+                                lines.append(line)
+
+                    full_text = "\n".join(lines)
+
+                    chunk = ""
+                    for line in full_text.split("\n"):
+                        if len(chunk) + len(line) > 512:
+                            self.result.append(chunk)
+                            chunk = line
+                        else:
+                            if chunk:
+                                chunk += "\n"+ line
+                            else:
+                                chunk = line
+
+                    if chunk:
+                        self.result.append(chunk)
 
                 else:
                     await ctx.send("Failed to fetch website...")
