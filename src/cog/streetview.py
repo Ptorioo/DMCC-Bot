@@ -5,42 +5,57 @@ import overpy
 from shapely.geometry import Point, shape
 from config import *
 
-class StreetView(commands.Cog):
+@app_commands.guilds(*sync_guilds)
+class StreetView(commands.GroupCog, name="streetview", description = "play street view guessing"):
     def __init__(self, bot):
         self.bot = bot
         self.current_image = None
         self.current_coords = None
 
-    @commands.command(name="streetview", aliases=["sv"], help="")
-    async def streetview(self, ctx, *args):
+    @app_commands.command(
+        name="streetview",
+        description="View a street and guess its country with /streetview guess"
+    )
+    async def streetview(self, ctx):
         if not ctx.guild:
             return
 
         await self.send_random_image(ctx)
 
-    @commands.command(name="g", help="")
-    async def guess(self, ctx, *args):
+
+    @app_commands.command(
+        name="guess",
+        description="guess the country"
+    )
+    @app_commands.describe(
+        country="name of the country"
+    )
+    async def guess(self, ctx, country:str):
         if not ctx.guild or not self.current_image or not self.current_coords:
+            ctx.response.send_message("Use `/streetview streetview` to start first")
             return
 
-        guessed_country = " ".join(args).lower()
+        guessed_country = " ".join(country).lower()
 
         if self.is_correct_guess(guessed_country):
-            await ctx.message.add_reaction("✅")
-            await self.send_random_image(ctx)
+            await ctx.response.send_message("✅")
+            await self.send_random_image(ctx, False)
         else:
-            await ctx.message.add_reaction("❌")
+            await ctx.response.send_message("❌")
 
-    @commands.command(name="end", help="")
+    @app_commands.command(
+        name="end",
+        description="End the street view guessing"
+    )
     async def stop(self, ctx):
         if not ctx.guild:
             return
 
         self.current_image = None
         self.current_coords = None
-        await ctx.send("The street view guessing game has been ended.")
+        await ctx.response.send_message("The street view guessing game has been ended.")
 
-    async def send_random_image(self, ctx):
+    async def send_random_image(self, ctx, commanded = True):
         folder_path = STREETVIEW_FOLDER
         
         try:
@@ -48,7 +63,10 @@ class StreetView(commands.Cog):
             while not os.path.isfile(os.path.join(folder_path, random_image)):
                 random_image = random.choice(os.listdir(folder_path))
         except IndexError:
-            await ctx.send("No images found in the folder.")
+            if commanded:
+                await ctx.response.send_message("No images found in the folder.")
+            else:
+                await ctx.channel.send("No images found in the folder.")
             return
 
         self.current_image = random_image
@@ -57,7 +75,10 @@ class StreetView(commands.Cog):
             lat = float(lat_str.replace('_', '.'))
             lng = float(lng_str.replace('_', '.'))
         except ValueError:
-            await ctx.send("Invalid image filename format.")
+            if commanded:
+                await ctx.response.send_message("Invalid image filename format.")
+            else:
+                ctx.channel.send("Invalid image filename format.")
             return
 
         self.current_coords = Point(lng, lat)
@@ -68,7 +89,10 @@ class StreetView(commands.Cog):
         file = discord.File(image_path, filename=random_image)
         embed.set_image(url=f"attachment://{random_image}")
 
-        await ctx.send(file=file, embed=embed)
+        if commanded:
+            await ctx.response.send_message(file=file, embed=embed)
+        else:
+            ctx.channel.send(file=file, embed=embed)
 
     def is_correct_guess(self, guessed_country):
         api = overpy.Overpass()

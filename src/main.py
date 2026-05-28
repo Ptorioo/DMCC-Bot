@@ -35,6 +35,24 @@ async def reload(ctx):
     await ctx.send(f"{bot.user.name} is now reloaded!")
     await bot.get_cog("Music")._init()
 
+@bot.command()
+@commands.is_owner()
+async def sync(ctx,guilds = 0):
+    if guilds != 0:
+        for guild in sync_guilds:
+            synced = await ctx.bot.tree.sync(guild=guild)
+            p = ""
+            for i in synced:
+                p += f"{i}, "
+            p = p[:-2]
+            await ctx.send(f"guild slash `{p}` are completely synced")
+    else:
+        synced = await ctx.bot.tree.sync()
+        p = ""
+        for i in synced:
+            p += f"{i}, "
+        p = p[:-2]
+        await ctx.send(f"slash `{p}` are completely synced")
 
 if __name__ == "__main__":
     asyncio.run(init())
