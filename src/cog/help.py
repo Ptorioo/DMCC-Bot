@@ -5,15 +5,21 @@ class Help(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command()
-    async def help(self, ctx, *arg):
-        if len(arg) == 0:
+    @app_commands.command(
+        name="help",
+        description="Know how to use the bot"
+    )
+    @app_commands.describe(
+        group="the command group you want to know how to use"
+    )
+    async def help(self, ctx, group:str = ""):
+        if not group:
             response = get_response("help")
             await send_response(ctx, response, True)
-        elif arg[0] == "music":
+        elif group == "music":
             response = get_response("help-music")
             await send_response(ctx, response, True)
-        elif arg[0] == "search":
+        elif group == "search":
             response = get_response("help-search")
             await send_response(ctx, response, True)
         else:
@@ -30,9 +36,9 @@ async def send_response(ctx, response, isEmbed):
         return
     else:
         if isEmbed:
-            await ctx.send(embed=response)
+            await ctx.response.send_message(embed=response)
         else:
-            await ctx.send(response)
+            await ctx.response.send_message(response)
 
 
 def get_response(arg):
@@ -45,12 +51,12 @@ def get_response(arg):
             )
             embed.add_field(
                 name="Music",
-                value="`!help music` info about the music commands",
+                value="`/help group:music` info about the music commands",
                 inline=False,
             )
             embed.add_field(
                 name="Search",
-                value="`!help search` info about the search engine",
+                value="`/help group:search` info about the search engine",
                 inline=False,
             )
             embed.set_footer(text="Feel free to give me feedback!")
@@ -60,39 +66,39 @@ def get_response(arg):
             embed = discord.Embed(title="Music", description="", color=0x00FF00)
             embed.add_field(
                 name="Clear",
-                value="`!clear`, `!c` clear the current queue",
+                value="`/music clear` clear the current queue",
                 inline=False,
             )
             embed.add_field(
-                name="Join", value="`!join` join the voice channel", inline=False
+                name="/music join", value="`!join` join the voice channel", inline=False
             )
             embed.add_field(
                 name="Leave",
-                value="`!leave`, `!dc`, `!disconnect` disconnect from the current voice channel",
+                value="`/music leave` disconnect from the current voice channel",
                 inline=False,
             )
             embed.add_field(
                 name="Pause",
-                value="`!pause`, `!stop` pause the current queue",
+                value="`/music pause` pause the current queue",
                 inline=False,
             )
             embed.add_field(
                 name="Play",
-                value="`!play`,`!p` play the song given an url or search keyword \n`!nowplaying`,`!np` show which song is playing in the voice channel",
+                value="`/music play` play the song given an url or search keyword \n`/music now_playing` show which song is playing in the voice channel",
                 inline=False,
             )
             embed.add_field(
                 name="Queue",
-                value="`!queue`, `!q` show the current queue",
+                value="`/music queue` show the current queue",
                 inline=False,
             )
             embed.add_field(
                 name="Resume",
-                value="`!resume`, `!r` resume the current queue",
+                value="`/music resume` resume the current queue",
                 inline=False,
             )
             embed.add_field(
-                name="Skip", value="`!skip`, `!s` skip the current song", inline=False
+                name="Skip", value="`/music skip` skip the current song", inline=False
             )
             embed.set_footer(text="Feel free to give me feedback!")
             return embed
@@ -101,17 +107,17 @@ def get_response(arg):
             embed = discord.Embed(title="Search", description="", color=0x00FF00)
             embed.add_field(
                 name="Song Info",
-                value="`!songinfo`, `!si` search for the general info about the song",
+                value="`/search songinfo` search for the general info about the song",
                 inline=False,
             )
             embed.add_field(
                 name="MIDI Download",
-                value="`!midi`, `!mid` search for MIDI file of the song",
+                value="`/search midi` search for MIDI file of the song",
                 inline=False,
             )
             embed.add_field(
                 name="Lyrics Search",
-                value="`!lyrics`, `!lyr` search for lyrics of the song",
+                value="`/search lyrics` search for lyrics of the song",
                 inline=False,
             )
             embed.set_footer(text="Feel free to give me feedback!")

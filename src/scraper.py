@@ -21,11 +21,12 @@ class Scraper:
             client_id=SPOTIFY_ID, client_secret=SPOTIFY_TOKEN
         )
         sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
-        await ctx.send("Sending request...")
+        await ctx.response.defer()
         track_info = sp.search(q=query, type="track")
+        #print(track_info["tracks"]["items"][0]["name"])
 
         if track_info:
-            await ctx.send("Successfully fetched result...")
+            respond = await ctx.followup.send("Successfully fetched result...")
             track = track_info["tracks"]["items"][0]
             audio_features = sp.audio_features([track["id"]])
             track_details = sp.track(track["id"])
@@ -56,21 +57,21 @@ class Scraper:
                     loudness
                 ]
             )
-            return self.result
+            return self.result, respond
 
         else:
-            await ctx.send("No search results...")
+            await ctx.followup.send("No search results...")
             self.result.append(0)
             return self.result
 
     async def scrapeMIDI(self, ctx, query):
         self.result = []
         self.midi_url += query
-        await ctx.send("Sending request...")
+        await ctx.response.defer()
         response = requests.get(self.midi_url)
 
         if response.status_code == 200:
-            await ctx.send(f"Successfully fetched website...")
+            await ctx.followup.send(f"Successfully fetched website...")
             soup = BeautifulSoup(response.content, "html.parser")
             if soup.find("div", class_="col-md-4 rounded mt-4"):
                 for com in soup.find_all("td"):
@@ -83,7 +84,7 @@ class Scraper:
                 return self.result
 
         else:
-            await ctx.send("Failed to fetch website...")
+            await ctx.followup.send("Failed to fetch website...")
             self.result.append(response.status_code)
             return self.result
 
@@ -102,7 +103,7 @@ class Scraper:
         self.result = []
         headers = {"Authorization": f"Bearer {GENIUS_TOKEN}"}
 
-        await ctx.send("Sending request...")
+        await ctx.response.defer()
         response = requests.get(
             f"{self.GENIUS_API_BASE_URL}/search?q={query}", headers=headers
         )
@@ -123,7 +124,7 @@ class Scraper:
                 lyrics_page = requests.get(lyrics_url)
 
                 if lyrics_page.status_code == 200:
-                    await ctx.send(f"Successfully fetched website...")
+                    await ctx.followup.send(f"Successfully fetched website...")
                     lyrics_page.raise_for_status()
                     soup = BeautifulSoup(lyrics_page.text, "html.parser")
                     lyrics_container_pattern = re.compile(r"^(ReferentFragment-desktop__Highlight-sc-|Lyrics__Container-sc-)")
@@ -162,15 +163,15 @@ class Scraper:
                         self.result.append(chunk)
 
                 else:
-                    await ctx.send("Failed to fetch website...")
+                    await ctx.followup.send("Failed to fetch website...")
                     self.result.append(lyrics_page.status_code)
                     return self.result
             except:
-                await ctx.send("Failed to find search result...")
+                await ctx.followup.send("Failed to find search result...")
                 self.result.append(0)
             return self.result
 
         else:
-            await ctx.send("Failed to fetch website...")
+            await ctx.followup.send("Failed to fetch website...")
             self.result.append(response.status_code)
             return self.result

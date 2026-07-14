@@ -2,8 +2,8 @@ from config import *
 from youtubesearchpython import VideosSearch
 import yt_dlp
 
-
-class Music(commands.Cog):
+@app_commands.guilds(*sync_guilds)
+class Music(commands.GroupCog, name="music", description = "play music via youtube"):
     def __init__(self, bot):
         self.bot = bot
 
@@ -61,7 +61,7 @@ class Music(commands.Cog):
             )
 
             if self.vc[id] == None:
-                await ctx.send("Could not connect to voice channel.")
+                await ctx.response.send_message("Could not connect to voice channel.")
                 return
         else:
             await self.vc[id].move_to(channel)
@@ -115,7 +115,7 @@ class Music(commands.Cog):
             self.duration[id] = [time.time(), time.time(), song["duration"]]
 
             message = self.now_playing_embed(ctx, song)
-            coro = ctx.send(embed=message)
+            coro = ctx.channel.send(embed=message)
             fut = asyncio.run_coroutine_threadsafe(coro, self.bot.loop)
             try:
                 fut.result()
@@ -130,7 +130,7 @@ class Music(commands.Cog):
             self.queueIndex[id] += 1
             self.is_playing[id] = False
             self.duration[id] = []
-            coro = ctx.send("There are no songs to be played in the queue.")
+            coro = ctx.channel.send("There are no songs to be played in the queue.")
             fut = asyncio.run_coroutine_threadsafe(coro, self.bot.loop)
             try:
                 fut.result()
@@ -150,7 +150,7 @@ class Music(commands.Cog):
             self.duration[id] = [time.time(), time.time(), song["duration"]]
 
             message = self.now_playing_embed(ctx, song)
-            await ctx.send(embed=message)
+            await ctx.channel.send(embed=message)
 
             self.vc[id].play(
                 discord.FFmpegPCMAudio(song["url"], **self.FFMPEG_OPTIONS),
@@ -159,11 +159,12 @@ class Music(commands.Cog):
         else:
             self.is_playing[id] = False
             self.duration[id] = []
-            await ctx.send("There are no songs to be played in the queue.")
+            await ctx.channel.send("There are no songs to be played in the queue.")
 
     def search(self, arg):
         videosSearch = VideosSearch(arg, limit=1)
         results = videosSearch.result()
+        print(results["result"][0])
 
         url = "https://www.youtube.com/watch?v=" + results["result"][0]["id"]
 
@@ -232,27 +233,34 @@ class Music(commands.Cog):
                 if self.vc[id] == None or not self.vc[id].is_connected():
                     break
 
-    @commands.command()
+    @app_commands.command(
+        name="join",
+        description="Join your VC"
+    )
     async def join(self, ctx):
         id = int(ctx.guild.id)
-        if not ctx.author.voice:
-            await ctx.send("You are not in a voice channel.")
+        if not ctx.user.voice:
+            await ctx.response.send_message("You are not in a voice channel.")
         elif self.vc[id] != None:
-            if ctx.author.voice.channel != self.vc[id].channel:
-                await ctx.send("Already joined a voice channel.")
+            if ctx.user.voice.channel != self.vc[id].channel:
+                await ctx.response.send_message("Already joined a voice channel.")
             else:
                 pass
         else:
-            channel = ctx.author.voice.channel
+            channel = ctx.user.voice.channel
+            await ctx.response.send_message("Successfully joined your voice channel.")
             await self.joinVC(ctx, channel)
 
-    @commands.command(name="leave", aliases=["dc", "disconnect"], help="")
+    @app_commands.command(
+        name="leave",
+        description="Leave your VC"
+    )
     async def leave(self, ctx):
         id = int(ctx.guild.id)
-        if not ctx.author.voice:
-            await ctx.send("You are not in a voice channel.")
-        elif ctx.author.voice.channel != self.vc[id].channel:
-            await ctx.send(
+        if not ctx.user.voice:
+            await ctx.response.send_message("You are not in a voice channel.")
+        elif ctx.user.voice.channel != self.vc[id].channel:
+            await ctx.response.send_message(
                 "You need to be in the same voice channel to use this command."
             )
         elif self.vc[id] != None:
@@ -262,17 +270,20 @@ class Music(commands.Cog):
             self.duration[id] = []
             await self.vc[id].disconnect()
             self.vc[id] = None
-            await ctx.send("Disconnected successfully.")
+            await ctx.response.send_message("Disconnected successfully.")
         else:
-            return
+            await ctx.response.send_message("Error handling number: 100001")
 
-    @commands.command(name="clear", aliases=["c"], help="")
+    @app_commands.command(
+        name="clear",
+        description="Clear the current queue"
+    )
     async def clear(self, ctx):
         id = int(ctx.guild.id)
-        if not ctx.author.voice:
-            await ctx.send("You are not in a voice channel.")
-        elif ctx.author.voice.channel != self.vc[id].channel:
-            await ctx.send(
+        if not ctx.user.voice:
+            await ctx.response.send_message("You are not in a voice channel.")
+        elif ctx.user.voice.channel != self.vc[id].channel:
+            await ctx.response.send_message(
                 "You need to be in the same voice channel to use this command."
             )
         else:
@@ -280,68 +291,80 @@ class Music(commands.Cog):
                 self.is_playing[id] = self.is_paused[id] = False
                 self.vc[id].stop()
             if self.musicQueue[id] != []:
-                await ctx.send("The music queue has been cleared.")
+                await ctx.response.send_message("The music queue has been cleared.")
                 self.musicQueue[id] = []
             self.queueIndex[id] = 0
             self.duration[id] = []
 
-    @commands.command(name="pause", aliases=["stop"], help="")
+    @app_commands.command(
+        name="pause",
+        description="Pause the current music"
+    )
     async def pause(self, ctx):
         id = int(ctx.guild.id)
-        if not ctx.author.voice:
-            await ctx.send("You are not in a voice channel.")
-        elif ctx.author.voice.channel != self.vc[id].channel:
-            await ctx.send(
+        if not ctx.user.voice:
+            await ctx.response.send_message("You are not in a voice channel.")
+        elif ctx.user.voice.channel != self.vc[id].channel:
+            await ctx.response.send_message(
                 "You need to be in the same voice channel to use this command."
             )
         elif self.is_playing[id]:
             self.is_playing[id] = False
             self.is_paused[id] = True
             self.vc[id].pause()
-            await ctx.send("Music paused!")
+            await ctx.response.send_message("Music paused!")
         else:
-            await ctx.send("Error handling number: 100001")
+            await ctx.response.send_message("Error handling number: 100001")
 
-    @commands.command(name="resume", aliases=["r"], help="")
+    @app_commands.command(
+        name="resume",
+        description="Resume the current music"
+    )
     async def resume(self, ctx):
         id = int(ctx.guild.id)
-        if not ctx.author.voice:
-            await ctx.send("You are not in a voice channel.")
-        elif ctx.author.voice.channel != self.vc[id].channel:
-            await ctx.send(
+        if not ctx.user.voice:
+            await ctx.response.send_message("You are not in a voice channel.")
+        elif ctx.user.voice.channel != self.vc[id].channel:
+            await ctx.response.send_message(
                 "You need to be in the same voice channel to use this command."
             )
         elif self.is_paused[id]:
             self.is_playing[id] = True
             self.is_paused[id] = False
             self.vc[id].resume()
-            await ctx.send("The music is now playing!")
+            await ctx.response.send_message("The music is now playing!")
         else:
-            await ctx.send("Error handling number: 100002")
+            await ctx.response.send_message("Error handling number: 100002")
 
-    @commands.command(name="nowplaying", aliases=["np"], help="")
+    @app_commands.command(
+        name="now_playing",
+        description="Show the current status of the music"
+    )
     async def nowplaying(self, ctx):
         id = int(ctx.guild.id)
-        if not ctx.author.voice:
-            await ctx.send("You are not in a voice channel.")
-        elif ctx.author.voice.channel != self.vc[id].channel:
-            await ctx.send(
+        if not ctx.user.voice:
+            await ctx.response.send_message("You are not in a voice channel.")
+        elif ctx.user.voice.channel != self.vc[id].channel:
+            await ctx.response.send_message(
                 "You need to be in the same voice channel to use this command."
             )
         elif self.is_playing[id]:
             song = self.musicQueue[id][self.queueIndex[id]][0]
             message = self.now_playing_embed(ctx, song)
-            await ctx.send(embed=message)
+            await ctx.response.send_message(embed=message)
         else:
             return
 
-    @commands.command(name="skip", aliases=["s"], help="")
+    @app_commands.command(
+        name="skip",
+        description="Skip to the next music"
+    )
     async def skip(self, ctx):
         id = int(ctx.guild.id)
-        if not ctx.author.voice:
-            await ctx.send("You are not in a voice channel.")
-        elif ctx.author.voice.channel != self.vc[id].channel:
-            await ctx.send(
+        if not ctx.user.voice:
+            await ctx.response.send_message("You are not in a voice channel.")
+        elif ctx.user.voice.channel != self.vc[id].channel:
+            await ctx.response.send_message(
                 "You need to be in the same voice channel to use this command."
             )
         elif self.queueIndex[id] == len(self.musicQueue[id]) - 1:
@@ -350,24 +373,27 @@ class Music(commands.Cog):
             self.is_paused[id] = True
             self.is_playing[id] = False
             self.duration[id] = []
-            await ctx.send("Song skipped, no more songs in the queue.")
+            await ctx.response.send_message("Song skipped, no more songs in the queue.")
         elif self.vc[id] and self.is_playing[id]:
             self.vc[id].pause()
             self.queueIndex[id] += 1
             await self.play_music(ctx)
-            await ctx.send("Song skipped.")
+            await ctx.response.send_message("Song skipped.")
         elif self.queueIndex[id] > len(self.musicQueue[id]) - 1:
             pass
-        #            await ctx.send("Queue index out of range.")
+        #            await ctx.response.send_message("Queue index out of range.")
         else:
-            await ctx.send("Error handling number: 100003")
+            await ctx.response.send_message("Error handling number: 100003")
 
-    @commands.command(name="queue", aliases=["q"], help="")
+    @app_commands.command(
+        name="queue",
+        description="Check the current queue"
+    )
     async def queue(self, ctx):
         id = int(ctx.guild.id)
         returnValue = ""
         if self.musicQueue[id] == []:
-            await ctx.send("There are no songs in the queue.")
+            await ctx.response.send_message("There are no songs in the queue.")
             return
         for i in range(self.queueIndex[id], len(self.musicQueue[id])):
             upNextSongs = len(self.musicQueue[id]) - self.queueIndex[id]
@@ -380,38 +406,46 @@ class Music(commands.Cog):
                 returnIndex = "- "
             returnValue += f"{returnIndex}[{self.musicQueue[id][i][0]['title']}]({self.musicQueue[id][i][0]['webpage_url']})\n"
             if returnValue == "":
-                await ctx.send("There are no songs in the queue.")
+                await ctx.response.send_message("There are no songs in the queue.")
                 return
         queue = discord.Embed(
             title="Current Queue", description=returnValue, colour=0x00FF00
         )
-        await ctx.send(embed=queue)
+        await ctx.response.send_message(embed=queue)
 
-    @commands.command(name="play", aliases=["p"], help="")
-    async def play(self, ctx, *args):
+    @app_commands.command(
+        name="play",
+        description="Add a music to the queue"
+    )
+    @app_commands.describe(
+        music="link or keyword of the music"
+    )
+    async def play(self, ctx, music:str = ""):
         id = int(ctx.guild.id)
-        arg = " ".join(args)
+        arg = " ".join(music)
 
-        if not ctx.author.voice:
-            await ctx.send("You are not in a voice channel.")
+        if not ctx.user.voice:
+            await ctx.response.send_message("You are not in a voice channel.")
             return
         elif self.vc[id] != None:
-            if ctx.author.voice.channel != self.vc[id].channel:
-                await ctx.send(
+            if ctx.user.voice.channel != self.vc[id].channel:
+                await ctx.response.send_message(
                     "You need to be in the same voice channel to use this command."
                 )
                 return
             else:
                 pass
 
-        channel = ctx.author.voice.channel
-        if not args:
+        channel = ctx.user.voice.channel
+        await ctx.response.defer()
+        if not music:
             if len(self.musicQueue[id]) == 0:
-                await ctx.send("There are no song to be played in the queue.")
+                await ctx.followup.send("There are no song to be played in the queue.")
                 return
             elif not self.is_playing[id]:
                 if len(self.musicQueue[id]) > 0:
                     await self.play_music(ctx)
+                    await ctx.followup.send("The music is now playing!")
                 else:
                     return
             else:
@@ -419,14 +453,15 @@ class Music(commands.Cog):
         else:
             song = self.search(arg)
             if type(song) == type(True):
-                await ctx.send("Could not load the song.")
+                await ctx.followup.send("Could not load the song.")
             else:
-                self.musicQueue[id].append([song, channel, ctx.author])
+                self.musicQueue[id].append([song, channel, ctx.user])
 
                 if not self.is_playing[id]:
                     await self.play_music(ctx)
+                    await ctx.followup.send("The music is now playing!")
                 else:
-                    await ctx.send("Added to queue.")
+                    await ctx.followup.send("Added to queue.")
 
 
 async def setup(bot):
