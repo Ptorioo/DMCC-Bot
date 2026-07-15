@@ -25,24 +25,50 @@ class Mod(commands.Cog):
 
     @commands.command()
     @commands.is_owner()
-    async def echo(self, ctx, role, *args):
+    async def echo(self, ctx, role: str | None = None, *args):
+        role_mention = ""
         next_line = False
-        if role.lower() == "everyone":
-            role_mention = "@everyone"
-            next_line = True
-        elif role.lower() == "here":
-            role_mention = "@here"
-            next_line = True
-        else:
-            try:
-                role_object = discord.utils.get(ctx.guild.roles, name=role)
-                role_mention = role_object.mention
-            except AttributeError:
-                role_mention = role
 
-        arg = " ".join(args)
+        if role:
+            if role.lower() == "everyone":
+                role_mention = "@everyone"
+                next_line = True
+
+            elif role.lower() == "here":
+                role_mention = "@here"
+                next_line = True
+
+            else:
+                role_object = discord.utils.get(ctx.guild.roles, name=role)
+
+                if role_object:
+                    role_mention = role_object.mention
+                else:
+                    role_mention = role
+
+        text = " ".join(args)
+
+        files = [
+            await attachment.to_file()
+            for attachment in ctx.message.attachments
+        ]
+
+        content = role_mention
+
+        if next_line and text:
+            content += "\n"
+        elif role_mention and text:
+            content += " "
+
+        content += text
+
         await ctx.message.delete()
-        await ctx.send(f"{role_mention}" + next_line * "\n" + f" {arg}")
+
+        if content or files:
+            await ctx.send(
+                content=content or None,
+                files=files,
+            )
     
     @commands.command()
     @commands.is_owner()
